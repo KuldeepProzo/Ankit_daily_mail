@@ -9,6 +9,7 @@ from datetime import timedelta, timezone
 from dotenv import load_dotenv
 import smtplib
 from email.message import EmailMessage
+from email.utils import formataddr
 from io import StringIO
 import re
 import threading
@@ -245,7 +246,7 @@ def send_email(dfs_dict, total_deals, report_label):
     for recipient in recipients:
         msg = EmailMessage()
         msg["Subject"] = f"Prozo | {report_label} Deal Property Change Report ({total_deals} deals monitored)"
-        msg["From"] = SMTP_USER
+        msg["From"] = formataddr(("Prozo Performance Manager", SMTP_USER.strip()))
         msg["To"] = recipient
 
         first_name = re.split(r"[._]", recipient.split("@")[0])[0].capitalize()
