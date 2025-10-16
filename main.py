@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, render_template_string
 import os
 import requests
 import pandas as pd
@@ -388,6 +388,33 @@ def run_weekly_report():
     thread = threading.Thread(target=generate_and_send_report, args=(24*7, "Weekly"))
     thread.start()
     return "🚀 Weekly deal Property change job triggered."
+
+@app.route("/get-report", methods=["GET", "POST"])
+def run_last_n_days_report():
+    if request.method == "POST":
+        try:
+            last_days = int(request.form.get("last_days", 30))
+        except ValueError:
+            return "❌ Invalid 'last_days' value. Must be a number.", 400
+
+        thread = threading.Thread(
+            target=generate_and_send_report,
+            args=(24 * last_days, f"Last {last_days} Days")
+        )
+        thread.start()
+
+        return f"🚀 Report job triggered for last {last_days} days!"
+
+    # Simple HTML form for GET requests
+    html = """
+    <h2>Generate Report</h2>
+    <form method="post" action="/get-report">
+        <label>Enter number of days:</label>
+        <input type="number" name="last_days" min="1" value="30" required>
+        <button type="submit">Generate Report</button>
+    </form>
+    """
+    return render_template_string(html)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5005, debug=True)
